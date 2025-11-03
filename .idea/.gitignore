@@ -1,0 +1,8 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+
+# Virtual environments
+venv/
+.env/
+*.env
