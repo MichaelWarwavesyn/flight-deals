@@ -1,11 +1,6 @@
-from pprint import pprint
-
-import json
 import requests
 from dotenv import load_dotenv
 import os
-
-from flight_data import FlightData
 
 load_dotenv()
 
@@ -31,10 +26,6 @@ class FlightSearch:
             "client_secret": self._api_secret,
         }
         amadeus_response = requests.post(url=TOKEN_ENDPOINT,headers=amadeus_header,data=amadeus_body)
-
-        # New bearer token. Typically expires in 1799 seconds (30min)
-        # print(f"Your token is {amadeus_response.json()['access_token']}")
-        # print(f"Your token expires in {amadeus_response.json()['expires_in']} seconds")
 
         return amadeus_response.json()['access_token']
 
@@ -76,22 +67,6 @@ class FlightSearch:
         }
         flight_offers_header = {"Authorization": f"Bearer {self._token}"}
         flight_offers_response = requests.get(url=FLIGHT_ENDPOINT,headers=flight_offers_header,params=flight_offers_query)
-        flight_offers_data = flight_offers_response.json()
+        flight_offers_data = flight_offers_response.json()["data"]
 
-        flights = flight_offers_data["data"]
-        best_flight_by_day: FlightData = FlightData(price="9999",
-                                         out_date="1999-01-01", return_date="1999-01-01",
-                                         origin_airport="CVG", destination_airport="CVG",
-                                         )
-        for flight_index in range(0,len(flights)):
-            flight_offer = FlightData(
-                price=flights[flight_index]["price"]["total"],
-                origin_airport=flights[flight_index]["itineraries"][0]["segments"][0]["departure"]["iataCode"],
-                destination_airport=flights[flight_index]["itineraries"][0]["segments"][-1]["arrival"]["iataCode"],
-                out_date=flights[flight_index]["itineraries"][0]["segments"][0]["departure"]["at"],
-                return_date=flights[flight_index]["itineraries"][0]["segments"][0]["departure"]["at"], # Not correct
-            )
-            if float(flight_offer.price) < float(best_flight_by_day.price):
-                best_flight_by_day = flight_offer
-
-        return best_flight_by_day
+        return flight_offers_data
